@@ -1,18 +1,25 @@
 package com.oms.json;
 
 import com.oms.domain.Point;
-import lombok.Getter;
 import org.json.JSONArray;
 import org.json.JSONObject;
-
+import org.springframework.cache.annotation.Cacheable;
 import java.util.ArrayList;
 
-@Getter
+
+/**
+ * Parsing logic here
+ * @getMiddle - returns the middle point
+ * @getPoints - returns an array with points
+ * @getCoordinates - returns array with doubles
+ */
 public class PointParser {
+
     private ArrayList<Point> points = new ArrayList<Point>();
+    private String json;
 
     public PointParser(String json) {
-        exctractPoints(json);
+        this.json = json;
     }
 
     public double[] getCoordinates() {
@@ -28,7 +35,7 @@ public class PointParser {
 
         return coordinates;
     }
-    private void exctractPoints(String json) {
+    public void exctractPoints()  {
 
         json = json.substring(1, json.length() - 1);
         JSONObject jsonObject = new JSONObject(json);
@@ -43,7 +50,6 @@ public class PointParser {
     private void getPointsFromLine(String line) {
         line = line.replaceAll("\\[", "").replaceAll("]", "");
         String[] lines = line.split(",");
-       // ArrayList<Point> points = new ArrayList<Point>();
 
         for (int i = 0; i < lines.length; i += 2) {
             points.add(new Point(
@@ -62,5 +68,12 @@ public class PointParser {
         }
 
         return new Point(x / points.size(), y / points.size());
+    }
+    @Cacheable("points")
+    public ArrayList<Point> getPoints() {
+        return this.points;
+    }
+    public String getJson() {
+        return this.json;
     }
 }
